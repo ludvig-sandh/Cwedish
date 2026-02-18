@@ -30,8 +30,8 @@ void init_token_array(TokenArray *array);
 
 void free_token_array(TokenArray *array);
 
-void append_token(TokenArray *array, Token token);
+void append_token(TokenArray *array, const Token *token);
 
-Token get_token(TokenArray *array, size_t index);
+Token *get_token(TokenArray *array, size_t index);
 
 #endif

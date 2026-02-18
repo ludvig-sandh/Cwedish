@@ -23,15 +23,15 @@ void grow_token_array(TokenArray *array) {
     array->capacity = new_cap;
 }
 
-void append_token(TokenArray *array, Token token) {
+void append_token(TokenArray *array, const Token *token) {
     if (array->size == array->capacity) {
         grow_token_array(array);
     }
 
-    array->data[array->size++] = token;
+    array->data[array->size++] = *token;
 }
 
-Token get_token(TokenArray *array, size_t index) {
+Token *get_token(TokenArray *array, size_t index) {
     assert(index < array->size && "index out of bounds for get_token()");
-    return array->data[index];
+    return &array->data[index];
 }
