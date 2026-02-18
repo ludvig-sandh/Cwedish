@@ -48,12 +48,25 @@ TokenArray scan_content(const char *content, size_t size) {
     init_token_array(&token_array);
 
     Token token;
+    token.type = TOK_KEYWORD;
+    token.start = content;
+    token.length = 0;
     
-    // TODO: Actually tokenize. This placeholder turns each character into a token.
+    // TODO: Actually tokenize. This placeholder turns each word into a token.
     for (const char *c = content; c < content + size; ++c) {
-        token.type = TOK_KEYWORD;
-        token.start = c;
-        token.length = 1;
+        if (*c == ' ' || *c == '\r' || *c == '\n') {
+            if (token.length != 0) {
+                append_token(&token_array, &token);
+            }
+
+            token.start = c + 1;
+            token.length = 0;
+        }else {
+            token.length++;
+        }
+    }
+
+    if (token.length != 0) {
         append_token(&token_array, &token);
     }
 
