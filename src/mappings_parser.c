@@ -1,15 +1,7 @@
-#include <stdio.h>
+#include "mappings_parser.h"
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
-
-#define MAX_KEYWORD_LENGTH 15
-#define MAX_NUM_MAPPINGS 40
-
-typedef struct {
-    char original[MAX_KEYWORD_LENGTH + 1];
-    char translated[MAX_KEYWORD_LENGTH + 1];
-} Mapping;
 
 bool copy_until_stop_character(const char *line, char stop, char *dest, size_t *num_copied) {
     char *stop_pos = strchr(line, stop);
@@ -70,15 +62,4 @@ size_t parse_mappings(const char *path, Mapping *mappings) {
     }
     
     return lines_parsed;
-}
-
-int main() {
-    const char *mappings_file_path = "keywords-table.txt";
-
-    Mapping mappings[MAX_NUM_MAPPINGS];
-    size_t num_mappings = parse_mappings(mappings_file_path, mappings);
-    for (size_t i = 0; i < num_mappings; i++) {
-        Mapping *mapping = &mappings[i];
-        printf("Parsed keyword \"%s\" -> \"%s\"\n", mapping->original, mapping->translated);
-    }
 }

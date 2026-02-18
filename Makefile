@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -std=c17 -Wall -Wextra -pedantic -O2
 
 TARGET = cwedish
-SRC = main.c
+SRC = src/main.c src/mappings_parser.c
 
 all: $(TARGET)
 
