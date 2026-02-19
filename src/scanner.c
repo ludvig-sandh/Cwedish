@@ -52,6 +52,107 @@ void append_and_reset_token(TokenArray *array, Token *token) {
     token->length = 0;
 }
 
+// Finite state machine for the different scanning modes
+typedef void (*State)(TokenArray *, Token *, const char *);
+State state;
+
+void state_possibly_multi_char_operator(TokenArray *array, Token *token, const char *c);
+
+void state_regular_code(TokenArray *array, Token *token, const char *c) {
+    switch (*c) {
+    case '\n':
+    case '\r':
+    case '\t':
+    case ' ':
+        // All these work like a separator I think
+        append_and_reset_token(array, token); // Append current token and skip this
+        token->start = c + 1;
+        break;
+    case '{':
+    case '}':
+    case '(':
+    case ')':
+    case '=':
+    case ',':
+    case ';':
+        // These should be tokens alone
+        append_and_reset_token(array, token);
+        token->start = c;
+        token->length++;
+        append_and_reset_token(array, token); // Apend this char as another token
+        token->start = c + 1;
+        break;
+    case '+':
+    case '-':
+    case '/':
+    case '*':
+    case '|':
+    case '&':
+    case '^':
+    case '~':
+        // Depending on the next character (eg. '='), the token may need the next char as well
+        state = state_possibly_multi_char_operator;
+        token->length++;
+        break;
+    default:
+        token->length++;
+        break;
+    }
+}
+
+void state_single_line_comment(TokenArray *array, Token *token, const char *c) {
+    (void)array;
+    if (*c == '\r' || *c == '\n') {
+        token->start = c + 1;
+        token->length = 0;
+        state = state_regular_code;
+    }
+}
+
+void state_multi_line_comment(TokenArray *array, Token *token, const char *c) {
+    (void)array;
+    if (*(c - 1) == '*' && *c == '/') {
+        token->start = c + 1;
+        token->length = 0;
+        state = state_regular_code;
+    }
+}
+
+void state_possibly_multi_char_operator(TokenArray *array, Token *token, const char *c) {
+    if (*c == '=') { // +=, |= or similar
+        token->length++;
+        append_and_reset_token(array, token);
+        token->start = c + 1;
+        state = state_regular_code;
+    }else if (*(c - 1) == '/' && *c == '/') { // //
+        state = state_single_line_comment;
+    }else if (*(c - 1) == '/' && *c == '*') { // /*
+        state = state_multi_line_comment;
+    }else if (*(c - 1) == '+' && *c == '+') { // ++
+        token->length++;
+        append_and_reset_token(array, token);
+        token->start = c + 1;
+        state = state_regular_code;
+    }else if (*(c - 1) == '-' && *c == '-') { // --
+        token->length++;
+        append_and_reset_token(array, token);
+        token->start = c + 1;
+        state = state_regular_code;
+    }else if (*(c - 1) == '<' && *c == '<') { // <<
+        token->length++;
+        append_and_reset_token(array, token);
+        state = state_possibly_multi_char_operator;
+    }else if (*(c - 1) == '>' && *c == '>') { // >>
+        token->length++;
+        append_and_reset_token(array, token);
+        state = state_possibly_multi_char_operator;
+    }else {
+        append_and_reset_token(array, token);
+        token->start = c;
+        state = state_regular_code;
+    }
+}
+
 TokenArray scan_content(const char *content, size_t size) {
     TokenArray token_array;
     init_token_array(&token_array);
@@ -60,35 +161,11 @@ TokenArray scan_content(const char *content, size_t size) {
     token.type = TOK_KEYWORD;
     token.start = content;
     token.length = 0;
+
+    state = state_regular_code;
     
     for (const char *c = content; c < content + size; ++c) {
-        switch (*c) {
-        case '\n':
-        case '\r':
-        case '\t':
-        case ' ':
-            // All these work like a separator I think
-            append_and_reset_token(&token_array, &token); // Append current token and skip this
-            token.start = c + 1;
-            break;
-        case '{':
-        case '}':
-        case '(':
-        case ')':
-        case '=':
-        case ',':
-        case ';':
-            // These should be tokens alone
-            append_and_reset_token(&token_array, &token); // Append current token
-            token.start = c;
-            token.length++;
-            append_and_reset_token(&token_array, &token); // Apennd this char as another token
-            token.start = c + 1;
-            break;
-        default:
-            token.length++;
-            break;
-        }
+        state(&token_array, &token, c);
     }
 
     append_and_reset_token(&token_array, &token);
