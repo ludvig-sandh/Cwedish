@@ -43,6 +43,15 @@ char *read_full_file_content(const char *path, size_t *out_size) {
     return buf;
 }
 
+void append_and_reset_token(TokenArray *array, Token *token) {
+    if (token->length != 0) {
+        append_token(array, token);
+    }
+
+    token->start = NULL;
+    token->length = 0;
+}
+
 TokenArray scan_content(const char *content, size_t size) {
     TokenArray token_array;
     init_token_array(&token_array);
@@ -52,23 +61,37 @@ TokenArray scan_content(const char *content, size_t size) {
     token.start = content;
     token.length = 0;
     
-    // TODO: Actually tokenize. This placeholder turns each word into a token.
     for (const char *c = content; c < content + size; ++c) {
-        if (*c == ' ' || *c == '\r' || *c == '\n') {
-            if (token.length != 0) {
-                append_token(&token_array, &token);
-            }
-
+        switch (*c) {
+        case '\n':
+        case '\r':
+        case '\t':
+        case ' ':
+            // All these work like a separator I think
+            append_and_reset_token(&token_array, &token); // Append current token and skip this
             token.start = c + 1;
-            token.length = 0;
-        }else {
+            break;
+        case '{':
+        case '}':
+        case '(':
+        case ')':
+        case '=':
+        case ',':
+        case ';':
+            // These should be tokens alone
+            append_and_reset_token(&token_array, &token); // Append current token
+            token.start = c;
             token.length++;
+            append_and_reset_token(&token_array, &token); // Apennd this char as another token
+            token.start = c + 1;
+            break;
+        default:
+            token.length++;
+            break;
         }
     }
 
-    if (token.length != 0) {
-        append_token(&token_array, &token);
-    }
+    append_and_reset_token(&token_array, &token);
 
     return token_array;
 }
