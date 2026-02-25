@@ -57,6 +57,8 @@ typedef void (*State)(TokenArray *, Token *, const char *);
 State state;
 
 void state_possibly_multi_char_operator(TokenArray *array, Token *token, const char *c);
+void state_single_quote_string(TokenArray *array, Token *token, const char *c);
+void state_double_quote_string(TokenArray *array, Token *token, const char *c);
 
 void state_regular_code(TokenArray *array, Token *token, const char *c) {
     switch (*c) {
@@ -67,6 +69,18 @@ void state_regular_code(TokenArray *array, Token *token, const char *c) {
         // All these work like a separator I think
         append_and_reset_token(array, token); // Append current token and skip this
         token->start = c + 1;
+        break;
+    case '\'':
+        append_and_reset_token(array, token);
+        token->start = c;
+        token->length++;
+        state = state_single_quote_string;
+        break;
+    case '\"':
+        append_and_reset_token(array, token);
+        token->start = c;
+        token->length++;
+        state = state_double_quote_string;
         break;
     case '{':
     case '}':
@@ -93,6 +107,56 @@ void state_regular_code(TokenArray *array, Token *token, const char *c) {
         // Depending on the next character (eg. '='), the token may need the next char as well
         state = state_possibly_multi_char_operator;
         token->length++;
+        break;
+    default:
+        token->length++;
+        break;
+    }
+}
+
+void state_escaped_single_quote_string(TokenArray *array, Token *token, const char *c) {
+    (void)array;
+    (void)c;
+    token->length++;
+    state = state_single_quote_string;
+}
+
+void state_escaped_double_quote_string(TokenArray *array, Token *token, const char *c) {
+    (void)array;
+    (void)c;
+    token->length++;
+    state = state_double_quote_string;
+}
+
+void state_single_quote_string(TokenArray *array, Token *token, const char *c) {
+    switch (*c) {
+    case '\\':
+        token->length++;
+        state = state_escaped_single_quote_string;
+        break;
+    case '\'':
+        token->length++;
+        append_and_reset_token(array, token);
+        token->start = c + 1;
+        state = state_regular_code;
+        break;
+    default:
+        token->length++;
+        break;
+    }
+}
+
+void state_double_quote_string(TokenArray *array, Token *token, const char *c) {
+    switch (*c) {
+    case '\\':
+        token->length++;
+        state = state_escaped_double_quote_string;
+        break;
+    case '\"':
+        token->length++;
+        append_and_reset_token(array, token);
+        token->start = c + 1;
+        state = state_regular_code;
         break;
     default:
         token->length++;
