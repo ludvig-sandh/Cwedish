@@ -18,17 +18,13 @@ int main() {
     // }
 
     size_t out_size = 0;
-    const char *content = read_full_file_content("example.c", &out_size);
+    char *content = read_full_file_content("example.c", &out_size);
     assert(content != NULL && "couldn't read file contents");
 
     TokenArray token_array = scan_content(content, out_size);
 
-    for (size_t i = 0; i < token_array.size; ++i) {
-        Token *token = get_token(&token_array, i);
-        printf("Token %d: \'", (int)(i + 1));
-        for (const char *c = token->start; c < token->start + token->length; ++c) {
-            printf("%c", *c);
-        }
-        printf("\'\n");
-    }
+    print_token_array(&token_array);
+
+    free(content);
+    free_token_array(&token_array);
 }

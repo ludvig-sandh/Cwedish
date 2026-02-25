@@ -1,4 +1,5 @@
 #include "token.h"
+#include <stdio.h>
 
 void init_token_array(TokenArray *array) {
     array->capacity = 0;
@@ -34,4 +35,15 @@ void append_token(TokenArray *array, const Token *token) {
 Token *get_token(TokenArray *array, size_t index) {
     assert(index < array->size && "index out of bounds for get_token()");
     return &array->data[index];
+}
+
+void print_token_array(TokenArray *array) {
+    for (size_t i = 0; i < array->size; ++i) {
+        Token *token = get_token(array, i);
+        printf("Token %d: \'", (int)(i + 1));
+        for (const char *c = token->start; c < token->start + token->length; ++c) {
+            printf("%c", *c);
+        }
+        printf("\'\n");
+    }
 }

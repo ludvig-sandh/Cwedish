@@ -34,4 +34,6 @@ void append_token(TokenArray *array, const Token *token);
 
 Token *get_token(TokenArray *array, size_t index);
 
+void print_token_array(TokenArray *array);
+
 #endif
