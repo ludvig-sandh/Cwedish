@@ -1,0 +1,11 @@
+#include <stdio.h>
+
+hel main() {
+    kar text[] = "för(;;) {}\n";
+    // för
+    för (hel i = 0; i < 5; ++i) {
+        /*A
+        B*/
+        printf("%d\n", i);
+    }
+}

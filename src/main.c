@@ -18,13 +18,19 @@ int main() {
     // }
 
     size_t out_size = 0;
-    char *content = read_full_file_content("example.c", &out_size);
+    char *content = read_full_file_content("example.cwe", &out_size);
     assert(content != NULL && "couldn't read file contents");
 
     TokenArray token_array = scan_content(content, out_size);
 
     print_token_array(&token_array);
 
+    int success = translate(&token_array, mappings, num_mappings, "example.c");
+
     free(content);
     free_token_array(&token_array);
+
+    if (!success) {
+        return 1;
+    }
 }

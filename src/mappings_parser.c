@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <math.h>
 
 bool copy_until_stop_character(const char *line, char stop, char *dest, size_t *num_copied) {
     char *stop_pos = strchr(line, stop);
@@ -62,4 +63,46 @@ size_t parse_mappings(const char *path, Mapping *mappings) {
     }
     
     return lines_parsed;
+}
+
+Mapping *get_mapping(Token *token, Mapping *mappings, size_t num_mappings) {
+    for (size_t i = 0; i < num_mappings; ++i) {
+        size_t safe_comparison_length = token->length < MAX_KEYWORD_LENGTH ? token->length : MAX_KEYWORD_LENGTH;
+        if (memcmp(token->start, mappings[i].translated, safe_comparison_length) == 0) {
+            return &mappings[i];
+        }
+    }
+    
+    return NULL;
+}
+
+bool translate(TokenArray *array, Mapping *mappings, size_t num_mappings, const char *path) {
+    FILE *fptr = fopen(path, "wb");
+    if (fptr == NULL) {
+        perror("fopen");
+        return false;
+    }
+
+    for (size_t i = 0; i < array->size; ++i) {
+        Token *token = get_token(array, i);
+        Mapping *mapping_found = get_mapping(token, mappings, num_mappings);
+        if (mapping_found == NULL) {
+            size_t written = fwrite(token->start, sizeof(char), token->length, fptr);
+            if (written != token->length) {
+                perror("fwrite");
+                fclose(fptr);
+                return false;
+            }
+        }else {
+            int written = fprintf(fptr, "%s", mapping_found->original);
+            if (written != (int)strlen(mapping_found->original)) {
+                perror("fprintf");
+                fclose(fptr);
+                return false;
+            }
+        }
+    }
+
+    fclose(fptr);
+    return true;
 }
