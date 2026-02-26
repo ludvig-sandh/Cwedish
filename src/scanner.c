@@ -67,7 +67,10 @@ void state_regular_code(TokenArray *array, Token *token, const char *c) {
     case '\t':
     case ' ':
         // All these work like a separator I think
-        append_and_reset_token(array, token); // Append current token and skip this
+        append_and_reset_token(array, token);
+        token->start = c;
+        token->length++;
+        append_and_reset_token(array, token);
         token->start = c + 1;
         break;
     case '\'':
@@ -165,19 +168,23 @@ void state_double_quote_string(TokenArray *array, Token *token, const char *c) {
 }
 
 void state_single_line_comment(TokenArray *array, Token *token, const char *c) {
-    (void)array;
     if (*c == '\r' || *c == '\n') {
+        append_and_reset_token(array, token);
+        token->start = c;
+        token->length++;
+        append_and_reset_token(array, token);
         token->start = c + 1;
-        token->length = 0;
         state = state_regular_code;
+    }else {
+        token->length++;
     }
 }
 
 void state_multi_line_comment(TokenArray *array, Token *token, const char *c) {
-    (void)array;
+    token->length++;
     if (*(c - 1) == '*' && *c == '/') {
+        append_and_reset_token(array, token);
         token->start = c + 1;
-        token->length = 0;
         state = state_regular_code;
     }
 }
@@ -189,8 +196,10 @@ void state_possibly_multi_char_operator(TokenArray *array, Token *token, const c
         token->start = c + 1;
         state = state_regular_code;
     }else if (*(c - 1) == '/' && *c == '/') { // //
+        token->length++;
         state = state_single_line_comment;
     }else if (*(c - 1) == '/' && *c == '*') { // /*
+        token->length++;
         state = state_multi_line_comment;
     }else if (*(c - 1) == '+' && *c == '+') { // ++
         token->length++;
