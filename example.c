@@ -1,8 +1,8 @@
 #include <stdio.h>
 
 int main() {
-    char text[] = "for(;;) {}\n";
-    // for
+    char text[] = "för(;;) {}\n";
+    // för
     for (int i = 0; i < 5; ++i) {
         /*A
         B*/

@@ -1,49 +1,78 @@
 package main
 
 import (
-	"fmt"
+	"flag"
+	"log"
 	"os"
+	"path/filepath"
 )
 
-func main() {
-	if len(os.Args) <= 1 {
-		fmt.Println("Not enough arguments: missing path to translation file")
-		os.Exit(1)
+func removeExtension(path string) string {
+	extension := filepath.Ext(path)
+	return path[0 : len(path)-len(extension)]
+}
+
+// Swaps out the file extension of
+func changeExtension(path string, newExtension string) string {
+	return removeExtension(path) + "." + newExtension
+}
+
+func parseArgs() (inFile string, outFile string) {
+	flag.StringVar(&outFile, "o", "", "output file")
+	flag.Parse()
+
+	if flag.NArg() < 1 {
+		log.Fatal("Not enough arguments: missing path to translation file")
 	}
 
-	fileToTranslate := os.Args[1]
-	bytes, err := os.ReadFile(fileToTranslate)
-	if err != nil {
-		fmt.Println("Input file could not be read: ", err)
-		os.Exit(1)
+	inFile = flag.Arg(0)
+
+	if outFile == "" {
+		outFile = changeExtension(inFile, "c")
 	}
 
-	tokens := Tokenize(bytes)
-	// for i, token := range tokens {
-	// 	fmt.Printf("Token %d: \"%s\"\n", i, string(token[:]))
-	// }
+	return
+}
 
-	dictionary := ParseMappingsFile("keywords-table.txt")
-	// fmt.Println(dictionary)
-
-	translatedTokens := []Token{}
-	for _, token := range tokens {
+func translateTokens(untranslated []Token, dictionary *Dictionary) (translated []Token) {
+	for _, token := range untranslated {
 		word := string(token[:])
 
-		translated, ok := dictionary[word]
+		translatedWord, ok := (*dictionary)[word]
 		if ok {
-			translatedTokens = append(translatedTokens, Token(translated))
+			translated = append(translated, Token(translatedWord))
 		} else {
-			translatedTokens = append(translatedTokens, token)
+			translated = append(translated, token)
 		}
 	}
+	return
+}
 
-	outBytes := []byte{}
-	for _, token := range translatedTokens {
-		for _, b := range token {
-			outBytes = append(outBytes, b)
-		}
+func concatenateTokens(tokens []Token) []byte {
+	total := 0
+	for _, token := range tokens {
+		total += len(token)
 	}
 
-	os.WriteFile("example.c", outBytes, 0644)
+	outBytes := make([]byte, 0, total)
+	for _, token := range tokens {
+		outBytes = append(outBytes, token...)
+	}
+
+	return outBytes
+}
+
+func main() {
+	inFile, outFile := parseArgs()
+
+	bytes, err := os.ReadFile(inFile)
+	if err != nil {
+		log.Fatal("Input file could not be read: ", err)
+	}
+
+	dictionary := ParseMappingsFile("keywords-table.txt")
+	tokens := Tokenize(bytes)
+	translatedTokens := translateTokens(tokens, &dictionary)
+	outBytes := concatenateTokens(translatedTokens)
+	os.WriteFile(outFile, outBytes, 0644)
 }
