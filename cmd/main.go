@@ -64,7 +64,7 @@ func concatenateTokens(tokens []scanner.Token) []byte {
 }
 
 func translate(in []byte) (out []byte) {
-	dictionary := dictionary.ParseDictionaryFile("keywords-table.txt")
+	dictionary := dictionary.ParseDictionaryFile("dictionary.txt")
 	tokens := scanner.Tokenize(in)
 	translatedTokens := translateTokens(tokens, &dictionary)
 	out = concatenateTokens(translatedTokens)
