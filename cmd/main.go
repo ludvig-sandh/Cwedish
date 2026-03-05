@@ -1,6 +1,8 @@
 package main
 
 import (
+	"cwedish/internal/dictionary"
+	"cwedish/internal/scanner"
 	"flag"
 	"log"
 	"os"
@@ -12,7 +14,6 @@ func removeExtension(path string) string {
 	return path[0 : len(path)-len(extension)]
 }
 
-// Swaps out the file extension of
 func changeExtension(path string, newExtension string) string {
 	return removeExtension(path) + "." + newExtension
 }
@@ -34,13 +35,13 @@ func parseArgs() (inFile string, outFile string) {
 	return
 }
 
-func translateTokens(untranslated []Token, dictionary *Dictionary) (translated []Token) {
+func translateTokens(untranslated []scanner.Token, dictionary *dictionary.Dictionary) (translated []scanner.Token) {
 	for _, token := range untranslated {
 		word := string(token[:])
 
 		translatedWord, ok := (*dictionary)[word]
 		if ok {
-			translated = append(translated, Token(translatedWord))
+			translated = append(translated, scanner.Token(translatedWord))
 		} else {
 			translated = append(translated, token)
 		}
@@ -48,7 +49,7 @@ func translateTokens(untranslated []Token, dictionary *Dictionary) (translated [
 	return
 }
 
-func concatenateTokens(tokens []Token) []byte {
+func concatenateTokens(tokens []scanner.Token) []byte {
 	total := 0
 	for _, token := range tokens {
 		total += len(token)
@@ -70,8 +71,8 @@ func main() {
 		log.Fatal("Input file could not be read: ", err)
 	}
 
-	dictionary := ParseMappingsFile("keywords-table.txt")
-	tokens := Tokenize(bytes)
+	dictionary := dictionary.ParseDictionaryFile("keywords-table.txt")
+	tokens := scanner.Tokenize(bytes)
 	translatedTokens := translateTokens(tokens, &dictionary)
 	outBytes := concatenateTokens(translatedTokens)
 	os.WriteFile(outFile, outBytes, 0644)

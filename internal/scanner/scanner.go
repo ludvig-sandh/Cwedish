@@ -1,4 +1,4 @@
-package main
+package scanner
 
 type stateFn func(*scanner) stateFn
 

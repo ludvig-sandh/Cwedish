@@ -1,4 +1,4 @@
-package main
+package dictionary
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ func splitLines(s string) []string {
 	return strings.Split(s, "\n")
 }
 
-func parseMappingsLine(line string) (original string, swedish string, sucess bool) {
+func parseDictionaryLine(line string) (original string, swedish string, sucess bool) {
 	if len(line) == 0 {
 		return "", "", false
 	}
@@ -27,7 +27,7 @@ func parseMappingsLine(line string) (original string, swedish string, sucess boo
 	return words[0], words[1], true
 }
 
-func ParseMappingsFile(path string) Dictionary {
+func ParseDictionaryFile(path string) Dictionary {
 	bytes, err := os.ReadFile(path)
 	if err != nil {
 		panic(err)
@@ -38,7 +38,7 @@ func ParseMappingsFile(path string) Dictionary {
 
 	lines := splitLines(content)
 	for _, line := range lines {
-		original, swedish, success := parseMappingsLine(line)
+		original, swedish, success := parseDictionaryLine(line)
 		if !success {
 			continue
 		}
