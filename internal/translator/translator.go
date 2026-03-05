@@ -33,8 +33,7 @@ func concatenateTokens(tokens []scanner.Token) []byte {
 	return outBytes
 }
 
-func Translate(in []byte) (out []byte) {
-	dictionary := dictionary.ParseDictionaryFile("dictionary.txt")
+func Translate(in []byte, dictionary dictionary.Dictionary) (out []byte) {
 	tokens := scanner.Tokenize(in)
 	translatedTokens := translateTokens(tokens, &dictionary)
 	out = concatenateTokens(translatedTokens)

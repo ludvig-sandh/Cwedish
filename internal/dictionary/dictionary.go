@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// cwedish keyword -> c keyword
 type Dictionary map[string]string
 
 func splitLines(s string) []string {
