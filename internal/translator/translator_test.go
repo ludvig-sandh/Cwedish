@@ -374,3 +374,15 @@ func TestTranslateAllDictionaryKeywords(t *testing.T) {
 		dict,
 	)
 }
+
+func TestTranslateWholeFilePreservesStringsAndComments(t *testing.T) {
+	t.Parallel()
+
+	dict := fullDictionary()
+	verifyTranslation(
+		t,
+		"#include <stdio.h>\n\nhel main() {\n    kar text[] = \"för(;;) {}\\n\";\n    // för\n    för (hel i = 0; i < 5; ++i) {\n        /*A\n        B*/\n        printf(\"%d\\n\", i);\n    }\n}\n",
+		"#include <stdio.h>\n\nint main() {\n    char text[] = \"för(;;) {}\\n\";\n    // för\n    for (int i = 0; i < 5; ++i) {\n        /*A\n        B*/\n        printf(\"%d\\n\", i);\n    }\n}\n",
+		dict,
+	)
+}
