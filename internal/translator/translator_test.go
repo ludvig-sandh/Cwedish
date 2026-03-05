@@ -6,6 +6,12 @@ import (
 	"testing"
 )
 
+type translationTestCase struct {
+	name     string
+	input    string
+	expected string
+}
+
 func fullDictionary() dictionary.Dictionary {
 	return dictionary.Dictionary{
 		"auto":      "auto",
@@ -59,11 +65,7 @@ func TestTranslateKeywordSeparators(t *testing.T) {
 	t.Parallel()
 
 	dict := fullDictionary()
-	testCases := []struct {
-		name     string
-		input    string
-		expected string
-	}{
+	testCases := []translationTestCase{
 		{
 			name:     "for before opening paren",
 			input:    "för(i=0;i<10;i++){}",
@@ -107,11 +109,7 @@ func TestTranslateKeywordsAroundOperators(t *testing.T) {
 	t.Parallel()
 
 	dict := fullDictionary()
-	testCases := []struct {
-		name     string
-		input    string
-		expected string
-	}{
+	testCases := []translationTestCase{
 		{
 			name:     "for with increment operator",
 			input:    "för(hel i=0;i<10;i++){}",
@@ -155,11 +153,7 @@ func TestTranslateLeavesKeywordsInsideIdentifiersUntouched(t *testing.T) {
 	t.Parallel()
 
 	dict := fullDictionary()
-	testCases := []struct {
-		name     string
-		input    string
-		expected string
-	}{
+	testCases := []translationTestCase{
 		{
 			name:     "prefix match in identifier",
 			input:    "förify();",
@@ -198,11 +192,7 @@ func TestTranslateLeavesKeywordsInsideStringsAndCharsUntouched(t *testing.T) {
 	t.Parallel()
 
 	dict := fullDictionary()
-	testCases := []struct {
-		name     string
-		input    string
-		expected string
-	}{
+	testCases := []translationTestCase{
 		{
 			name:     "double quoted string",
 			input:    "printf(\"för om medan returnera\");",
@@ -236,11 +226,7 @@ func TestTranslateLeavesKeywordsInsideCommentsUntouched(t *testing.T) {
 	t.Parallel()
 
 	dict := fullDictionary()
-	testCases := []struct {
-		name     string
-		input    string
-		expected string
-	}{
+	testCases := []translationTestCase{
 		{
 			name:     "single line comment",
 			input:    "hel x; // för om returnera\nreturnera x;",
