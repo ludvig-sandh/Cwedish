@@ -63,17 +63,22 @@ func concatenateTokens(tokens []scanner.Token) []byte {
 	return outBytes
 }
 
+func translate(in []byte) (out []byte) {
+	dictionary := dictionary.ParseDictionaryFile("keywords-table.txt")
+	tokens := scanner.Tokenize(in)
+	translatedTokens := translateTokens(tokens, &dictionary)
+	out = concatenateTokens(translatedTokens)
+	return
+}
+
 func main() {
 	inFile, outFile := parseArgs()
 
-	bytes, err := os.ReadFile(inFile)
+	inBytes, err := os.ReadFile(inFile)
 	if err != nil {
 		log.Fatal("Input file could not be read: ", err)
 	}
 
-	dictionary := dictionary.ParseDictionaryFile("keywords-table.txt")
-	tokens := scanner.Tokenize(bytes)
-	translatedTokens := translateTokens(tokens, &dictionary)
-	outBytes := concatenateTokens(translatedTokens)
+	outBytes := translate(inBytes)
 	os.WriteFile(outFile, outBytes, 0644)
 }
