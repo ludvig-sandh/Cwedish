@@ -1,11 +1,57 @@
 #include <stdio.h>
 
-hel main() {
-    kar text[] = "för(;;) {}\n";
-    // för
-    för (hel i = 0; i < 5; ++i) {
-        /*A
-        B*/
-        printf("%d\n", i);
+typdef strukt Demo {
+    kort small;
+    hel count;
+    lång big;
+    kar letter;
+    flyt ratio;
+    dubbel precise;
+} Demo;
+
+statisk hel choose_value(hel input) {
+    om (input < 0) {
+        gåtill fallback;
     }
+
+    byt (input) {
+    fall 0:
+        returnera 10;
+    fall 1:
+        returnera 20;
+    standard:
+        returnera input;
+    }
+
+fallback:
+    returnera -1;
+}
+
+hel main() {
+    Demo demo = {1, 2, 3, 'A', 1.5f, 2.5};
+    hel result = 0;
+
+    för (hel i = 0; i < 5; ++i) {
+        om (i == 2) {
+            fortsätt;
+        }
+
+        result += choose_value(i);
+
+        om (result > 20) {
+            bryt;
+        }
+    }
+
+    om (demo.count > 0) {
+        result += demo.small;
+    } annars {
+        result -= demo.small;
+    }
+
+    medan (result > 100) {
+        result--;
+    }
+
+    returnera result;
 }
