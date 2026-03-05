@@ -55,6 +55,7 @@ func Tokenize(bytes []byte) []Token {
 	for !scanner.isDone() {
 		scanner.state = scanner.state(scanner)
 	}
+	scanner.finishToken()
 	return scanner.tokens
 }
 
@@ -77,7 +78,7 @@ func stateRegularCode(s *scanner) stateFn {
 		s.extendToken()
 		return stateDoubleQuoteString
 
-	case '{', '}', '(', ')', '=', ',', ';':
+	case '{', '}', '(', ')', '=', ',', ';', ':':
 		s.finishToken()
 		s.extendToken()
 		s.finishToken()
