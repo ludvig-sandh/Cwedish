@@ -1,8 +1,7 @@
 package main
 
 import (
-	"cwedish/internal/dictionary"
-	"cwedish/internal/scanner"
+	"cwedish/internal/translator"
 	"flag"
 	"log"
 	"os"
@@ -35,42 +34,6 @@ func parseArgs() (inFile string, outFile string) {
 	return
 }
 
-func translateTokens(untranslated []scanner.Token, dictionary *dictionary.Dictionary) (translated []scanner.Token) {
-	for _, token := range untranslated {
-		word := string(token[:])
-
-		translatedWord, ok := (*dictionary)[word]
-		if ok {
-			translated = append(translated, scanner.Token(translatedWord))
-		} else {
-			translated = append(translated, token)
-		}
-	}
-	return
-}
-
-func concatenateTokens(tokens []scanner.Token) []byte {
-	total := 0
-	for _, token := range tokens {
-		total += len(token)
-	}
-
-	outBytes := make([]byte, 0, total)
-	for _, token := range tokens {
-		outBytes = append(outBytes, token...)
-	}
-
-	return outBytes
-}
-
-func translate(in []byte) (out []byte) {
-	dictionary := dictionary.ParseDictionaryFile("dictionary.txt")
-	tokens := scanner.Tokenize(in)
-	translatedTokens := translateTokens(tokens, &dictionary)
-	out = concatenateTokens(translatedTokens)
-	return
-}
-
 func main() {
 	inFile, outFile := parseArgs()
 
@@ -79,6 +42,6 @@ func main() {
 		log.Fatal("Input file could not be read: ", err)
 	}
 
-	outBytes := translate(inBytes)
+	outBytes := translator.Translate(inBytes)
 	os.WriteFile(outFile, outBytes, 0644)
 }
