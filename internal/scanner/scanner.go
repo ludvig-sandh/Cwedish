@@ -78,13 +78,13 @@ func stateRegularCode(s *scanner) stateFn {
 		s.extendToken()
 		return stateDoubleQuoteString
 
-	case '{', '}', '(', ')', '=', ',', ';', ':':
+	case '{', '}', '(', ')', ',', ';', ':':
 		s.finishToken()
 		s.extendToken()
 		s.finishToken()
 		return stateRegularCode
 
-	case '+', '-', '/', '*', '|', '&', '^', '~', '<', '>':
+	case '+', '-', '/', '*', '|', '&', '^', '~', '<', '>', '=':
 		s.finishToken()
 		s.extendToken()
 		return statePossiblyMultiCharOperator
@@ -167,7 +167,17 @@ func statePossiblyMultiCharOperator(s *scanner) stateFn {
 
 	switch {
 	case c == '=':
-		// +=, |=, <<=, etc.
+		// +=, |=, <<=, ==, etc.
+		s.extendToken()
+		s.finishToken()
+		return stateRegularCode
+
+	case prev == '&' && c == '&':
+		s.extendToken()
+		s.finishToken()
+		return stateRegularCode
+
+	case prev == '|' && c == '|':
 		s.extendToken()
 		s.finishToken()
 		return stateRegularCode
