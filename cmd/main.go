@@ -66,5 +66,7 @@ func main() {
 
 	dict := loadDictionary(dictionaryPath)
 	outBytes := translator.Translate(inBytes, dict)
-	os.WriteFile(outFile, outBytes, 0644)
+	if err := os.WriteFile(outFile, outBytes, 0644); err != nil {
+		log.Fatal("Output file could not be written: ", err)
+	}
 }
