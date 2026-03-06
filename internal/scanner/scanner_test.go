@@ -51,6 +51,11 @@ func TestTokenizeSeparatorsAndWhitespace(t *testing.T) {
 			input:    "if\t(x)\n{\n}",
 			expected: []string{"if", "\t", "(", "x", ")", "\n", "{", "\n", "}"},
 		},
+		{
+			name:     "brackets dot and question mark",
+			input:    "items[0].value ? left : right",
+			expected: []string{"items", "[", "0", "]", ".", "value", " ", "?", " ", "left", " ", ":", " ", "right"},
+		},
 	}
 
 	for _, tc := range testCases {
@@ -78,6 +83,11 @@ func TestTokenizeOperators(t *testing.T) {
 			name:     "comparison and logical operators",
 			input:    "a<=b && c>=d || e==f",
 			expected: []string{"a", "<=", "b", " ", "&&", " ", "c", ">=", "d", " ", "||", " ", "e", "==", "f"},
+		},
+		{
+			name:     "not equal modulo and bitwise not",
+			input:    "if (!ready || value%2 != 0) return ~value;",
+			expected: []string{"if", " ", "(", "!", "ready", " ", "||", " ", "value", "%", "2", " ", "!=", " ", "0", ")", " ", "return", " ", "~", "value", ";"},
 		},
 	}
 
