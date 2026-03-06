@@ -1,3 +1,11 @@
+<p align="center">
+  <img alt="Go" src="https://img.shields.io/badge/Go-1.25.4-00ADD8?logo=go&logoColor=white">
+  <img alt="License" src="https://img.shields.io/badge/License-MIT-green">
+  <a href="https://github.com/ludvig-sandh/Cwedish/actions/workflows/test.yml">
+    <img alt="Tests" src="https://github.com/ludvig-sandh/Cwedish/actions/workflows/test.yml/badge.svg">
+  </a>
+</p>
+
 # Cwedish
 A translator for a custom C language where all the keywords are replaced by Swedish words
 
